@@ -130,8 +130,8 @@
     font-size: 12px;
     color: var(--text-muted);
   }
-  .commute-filter label { white-space: nowrap; }
-  .commute-filter input {
+  .commute-filter .commute-label { white-space: nowrap; }
+  .commute-filter input[type="number"] {
     width: 64px;
     border: 1px solid var(--border);
     background: var(--surface2);
@@ -140,6 +140,32 @@
     padding: 6px 8px;
     font: inherit;
     font-size: 13px;
+  }
+  .commute-modes {
+    display: flex;
+    gap: 4px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 2px;
+    background: var(--surface);
+  }
+  .commute-modes label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .commute-modes input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .commute-modes label:has(input:checked) {
+    background: var(--surface2);
+    color: var(--accent2);
   }
   .commute-filter button {
     border: 1px solid var(--border);
@@ -303,8 +329,14 @@
       <button class="filter" data-filter="Active">Active only</button>
       <button class="filter" data-filter="Top">Top schools</button>
       <div class="commute-filter">
-        <label for="maxPeak">Max avg peak commute (min)</label>
-        <input id="maxPeak" type="number" min="1" max="120" step="1" placeholder="e.g. 40" inputmode="numeric">
+        <span class="commute-label">Peak commute ≤</span>
+        <input id="maxPeak" type="number" min="1" max="120" step="1" placeholder="e.g. 40" inputmode="numeric" aria-label="Max peak commute minutes">
+        <span class="commute-label">min using</span>
+        <div class="commute-modes" role="radiogroup" aria-label="Commute metric">
+          <label><input type="radio" name="peakMode" value="min"> Min</label>
+          <label><input type="radio" name="peakMode" value="avg" checked> Avg</label>
+          <label><input type="radio" name="peakMode" value="max"> Max</label>
+        </div>
         <button type="button" id="clearPeak">Clear</button>
       </div>
     </div>
@@ -331,6 +363,17 @@ let DATA = null;
 let statusFilter = 'all';
 let schoolFilter = false;
 let maxPeakCommute = null;
+let peakMode = 'avg'; // min | avg | max
+
+function peakValue(h) {
+  if (peakMode === 'min') return h.peakCommuteMin ?? h.peakCommuteAvg ?? 99;
+  if (peakMode === 'max') return h.peakCommuteMax ?? h.peakCommuteAvg ?? 99;
+  return h.peakCommuteAvg ?? 99;
+}
+
+function peakModeLabel() {
+  return peakMode === 'min' ? 'min' : peakMode === 'max' ? 'max' : 'avg';
+}
 
 async function boot() {
   const res = await fetch('data/homes.json');
@@ -366,11 +409,18 @@ function bindUi() {
     });
   });
   const peakInput = document.getElementById('maxPeak');
-  peakInput.addEventListener('input', () => {
+  const applyPeak = () => {
     const v = peakInput.value.trim();
     maxPeakCommute = v === '' ? null : Number(v);
     if (maxPeakCommute !== null && Number.isNaN(maxPeakCommute)) maxPeakCommute = null;
     render();
+  };
+  peakInput.addEventListener('input', applyPeak);
+  document.querySelectorAll('input[name="peakMode"]').forEach((r) => {
+    r.addEventListener('change', () => {
+      peakMode = r.value;
+      render();
+    });
   });
   document.getElementById('clearPeak').addEventListener('click', () => {
     peakInput.value = '';
@@ -383,7 +433,7 @@ function filtered() {
   return DATA.homes.filter((h) => {
     if (statusFilter !== 'all' && h.status !== statusFilter) return false;
     if (schoolFilter && h.schoolBand !== 'Top') return false;
-    if (maxPeakCommute !== null && h.peakCommuteAvg > maxPeakCommute) return false;
+    if (maxPeakCommute !== null && peakValue(h) > maxPeakCommute) return false;
     return true;
   });
 }
@@ -392,7 +442,7 @@ function sortedPriority(list) {
   return [...list].sort((a, b) => {
     const band = bandRank[a.schoolBand] - bandRank[b.schoolBand];
     if (band) return band;
-    const r = (a.peakCommuteAvg ?? 99) - (b.peakCommuteAvg ?? 99);
+    const r = peakValue(a) - peakValue(b);
     if (r) return r;
     return a.price - b.price;
   });
@@ -411,6 +461,9 @@ function garageLabel(h) {
   const n = h.garageBays ?? h.garage ?? 0;
   return n ? `${n}-car` : '—';
 }
+function rushTriple(h) {
+  return `${h.peakCommuteMin ?? '—'} / ${h.peakCommuteAvg ?? '—'} / ${h.peakCommuteMax ?? '—'}`;
+}
 
 function tableWrap(headers, rowsHtml) {
   if (!rowsHtml) return `<div class="empty">No homes match this filter.</div>`;
@@ -421,7 +474,9 @@ function render() {
   const list = filtered();
   const active = DATA.homes.filter((h) => h.status === 'Active');
   const topActive = active.filter((h) => h.schoolBand === 'Top').length;
-  const peakNote = maxPeakCommute !== null ? ` · peak ≤ ${maxPeakCommute} min` : '';
+  const peakNote = maxPeakCommute !== null
+    ? ` · ${peakModeLabel()} ≤ ${maxPeakCommute} min`
+    : '';
   document.getElementById('stats').innerHTML = [
     `<span class="pill on">${DATA.homes.length} homes</span>`,
     `<span class="pill">${active.length} active</span>`,
@@ -431,7 +486,7 @@ function render() {
 
   const prio = sortedPriority(list);
   document.getElementById('panel-priority').innerHTML = tableWrap(
-    ['Address', 'Status', 'Price', 'Schools', 'High school', 'Rush', 'Avg peak', 'Golf', 'Basement', 'Garage', 'Link'],
+    ['Address', 'Status', 'Price', 'Schools', 'High school', 'Rush', 'Min/Avg/Max', 'Golf', 'Basement', 'Garage', 'Link'],
     prio.map((h) => `<tr>
       <td>${addrCell(h)}</td>
       <td>${statusBadge(h)}</td>
@@ -439,7 +494,7 @@ function render() {
       <td>${bandBadge(h)}</td>
       <td>${h.high}</td>
       <td>${h.commuteRush}</td>
-      <td class="num">${h.peakCommuteAvg} min</td>
+      <td class="num">${rushTriple(h)}</td>
       <td>${h.golfKind}</td>
       <td>${h.basement}</td>
       <td class="num">${garageLabel(h)}</td>
@@ -460,11 +515,13 @@ function render() {
   );
 
   document.getElementById('panel-commute').innerHTML = tableWrap(
-    ['Address', 'Rush range', 'Avg peak', 'Off-peak', 'Route', 'Price'],
-    [...list].sort((a, b) => (a.peakCommuteAvg ?? 99) - (b.peakCommuteAvg ?? 99)).map((h) => `<tr>
+    ['Address', 'Rush range', 'Min', 'Avg', 'Max', 'Off-peak', 'Route', 'Price'],
+    [...list].sort((a, b) => peakValue(a) - peakValue(b)).map((h) => `<tr>
       <td>${addrCell(h)}</td>
       <td>${h.commuteRush}</td>
-      <td class="num">${h.peakCommuteAvg} min</td>
+      <td class="num">${h.peakCommuteMin}</td>
+      <td class="num">${h.peakCommuteAvg}</td>
+      <td class="num">${h.peakCommuteMax}</td>
       <td>${h.commuteOffPeak}</td>
       <td>${h.commuteRoute}</td>
       <td class="num">${money(h.price)}</td>
@@ -513,7 +570,7 @@ function render() {
         <div class="card-tags">
           ${statusBadge(h)}
           ${bandBadge(h)}
-          <span class="badge">avg peak ${h.peakCommuteAvg} min</span>
+          <span class="badge">peak ${rushTriple(h)}</span>
           <span class="badge">${h.basement} basement</span>
           <span class="badge">${garageLabel(h)}</span>
           <span class="badge">${h.golfKind}</span>

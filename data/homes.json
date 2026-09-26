@@ -14,7 +14,8 @@
       "Bromley appears once (Redfin + Zillow were the same home).",
       "Prices and status change daily — verify on the listing link.",
       "Pleasant Wyatt added from OneHome (MLS #4409483) on 2026-09-26.",
-      "Basement values: None / Finished / Unfinished. peakCommuteAvg is the midpoint of the estimated rush-hour range to Honeywell."
+      "Basement values: None / Finished / Unfinished. Commute filter uses rush-hour min / avg / max to Honeywell (avg = midpoint of the estimated range).",
+      "Egret Ridge (Misty Waters waterfront) added 2026-09-26."
     ]
   },
   "homes": [
@@ -54,7 +55,9 @@
       "url": "https://www.redfin.com/NC/Davidson/16830-Reinsch-Dr-28036/home/52433655",
       "basement": "Finished",
       "garageBays": 3,
-      "peakCommuteAvg": 45
+      "peakCommuteAvg": 45,
+      "peakCommuteMin": 35,
+      "peakCommuteMax": 55
     },
     {
       "id": "pleasant-wyatt",
@@ -92,7 +95,9 @@
       "url": "https://www.coldwellbankerhomes.com/nc/charlotte/11808-pleasant-wyatt-pl/pid_72990020/",
       "basement": "None",
       "garageBays": 3,
-      "peakCommuteAvg": 42
+      "peakCommuteAvg": 42,
+      "peakCommuteMin": 30,
+      "peakCommuteMax": 55
     },
     {
       "id": "ellison",
@@ -130,7 +135,9 @@
       "url": "https://www.zillow.com/homedetails/128-Ellison-Way-Waxhaw-NC-28173/348729540_zpid/",
       "basement": "None",
       "garageBays": 3,
-      "peakCommuteAvg": 55
+      "peakCommuteAvg": 55,
+      "peakCommuteMin": 40,
+      "peakCommuteMax": 70
     },
     {
       "id": "reflection",
@@ -168,7 +175,9 @@
       "url": "https://www.redfin.com/NC/Belmont/1521-Reflection-Pointe-Blvd-28012/home/44575605",
       "basement": "Finished",
       "garageBays": 2,
-      "peakCommuteAvg": 32
+      "peakCommuteAvg": 32,
+      "peakCommuteMin": 25,
+      "peakCommuteMax": 40
     },
     {
       "id": "bannerman",
@@ -206,7 +215,9 @@
       "url": "https://www.zillow.com/homedetails/746-Bannerman-Ln-Fort-Mill-SC-29715/90067858_zpid/",
       "basement": "None",
       "garageBays": 3,
-      "peakCommuteAvg": 48
+      "peakCommuteAvg": 48,
+      "peakCommuteMin": 35,
+      "peakCommuteMax": 60
     },
     {
       "id": "ashford",
@@ -244,7 +255,9 @@
       "url": "https://www.zillow.com/homedetails/3030-Ashford-Glen-Dr-Matthews-NC-28104/58462104_zpid/",
       "basement": "None",
       "garageBays": 3,
-      "peakCommuteAvg": 55
+      "peakCommuteAvg": 55,
+      "peakCommuteMin": 40,
+      "peakCommuteMax": 70
     },
     {
       "id": "wyndham",
@@ -282,7 +295,9 @@
       "url": "https://www.zillow.com/homedetails/15304-Wyndham-Oaks-Dr-Charlotte-NC-28277/125831676_zpid/",
       "basement": "None",
       "garageBays": 3,
-      "peakCommuteAvg": 42
+      "peakCommuteAvg": 42,
+      "peakCommuteMin": 30,
+      "peakCommuteMax": 55
     },
     {
       "id": "sommerton",
@@ -320,7 +335,9 @@
       "url": "https://www.redfin.com/SC/Indian-Land/2324-Sommerton-Gln-29707/home/52334352",
       "basement": "Finished",
       "garageBays": 3,
-      "peakCommuteAvg": 55
+      "peakCommuteAvg": 55,
+      "peakCommuteMin": 40,
+      "peakCommuteMax": 70
     },
     {
       "id": "ocaso",
@@ -358,7 +375,9 @@
       "url": "https://www.redfin.com/NC/Matthews/3003-Ocaso-Ct-28104/home/43843190",
       "basement": "Finished",
       "garageBays": 3,
-      "peakCommuteAvg": 55
+      "peakCommuteAvg": 55,
+      "peakCommuteMin": 40,
+      "peakCommuteMax": 70
     },
     {
       "id": "piper",
@@ -396,7 +415,9 @@
       "url": "https://www.redfin.com/NC/Charlotte/4935-Piper-Glen-Dr-28277/home/44047029",
       "basement": "None",
       "garageBays": 2,
-      "peakCommuteAvg": 42
+      "peakCommuteAvg": 42,
+      "peakCommuteMin": 30,
+      "peakCommuteMax": 55
     },
     {
       "id": "bromley",
@@ -434,7 +455,9 @@
       "url": "https://redf.in/9kRVgA",
       "basement": "Finished",
       "garageBays": 3,
-      "peakCommuteAvg": 55
+      "peakCommuteAvg": 55,
+      "peakCommuteMin": 40,
+      "peakCommuteMax": 70
     },
     {
       "id": "waterview",
@@ -472,7 +495,49 @@
       "url": "https://www.realtor.com/realestateandhomes-detail/8041-Water-View-Dr_Belmont_NC_28012_M65488-06354",
       "basement": "Finished",
       "garageBays": 3,
-      "peakCommuteAvg": 32
+      "peakCommuteAvg": 32,
+      "peakCommuteMin": 25,
+      "peakCommuteMax": 40
+    },
+    {
+      "id": "egret",
+      "address": "9267 Egret Rdg",
+      "city": "Belmont",
+      "state": "NC",
+      "zip": "28012",
+      "status": "Active",
+      "price": 1325000,
+      "beds": 5,
+      "baths": "5",
+      "sqft": 5790,
+      "lotAcres": 1.08,
+      "year": 2004,
+      "garage": 3,
+      "hoaMo": 230,
+      "ppsf": 229,
+      "pool": "Community pool (no private) — lake cove shoreline",
+      "secondLiving": "Yes — walk-out terrace suite w/ wet bar / 2nd kitchen, theater, gym space",
+      "gated": true,
+      "community": "Misty Waters (Lake Wylie)",
+      "elem": "J.B. Page / Belmont feeders",
+      "middle": "Belmont Middle · 5/10",
+      "high": "South Point HS · 8/10",
+      "schoolBand": "Strong",
+      "schoolNote": "Gaston / Belmont — South Point solid; shorter Honeywell commute. Confirm assignment.",
+      "commuteRush": "25–40 min",
+      "commuteOffPeak": "18–25 min",
+      "commuteRoute": "Wilkinson / I-85 → Mint St",
+      "golf": "Lakefront gated Misty Waters — cove access + deeded boat slip #28; not a golf-course lot",
+      "golfKind": "Lake / rec, not golf",
+      "dom": "42–43",
+      "highlights": "Waterfront on wooded cove (1+ ac). Main guest suite, primary w/ lounge, walk-out theater + 2nd kitchen. Price cut $50K from $1.375M. Open house Sat Sep 26 10am–12pm.",
+      "source": "Redfin",
+      "url": "https://www.redfin.com/NC/Belmont/9267-Egret-Rdg-28012/home/41045565",
+      "basement": "Finished",
+      "garageBays": 3,
+      "peakCommuteAvg": 32,
+      "peakCommuteMin": 25,
+      "peakCommuteMax": 40
     },
     {
       "id": "reliance",
@@ -510,7 +575,9 @@
       "url": "https://www.redfin.com/SC/Tega-Cay/638-Reliance-Ct-29708/home/52077062",
       "basement": "Finished",
       "garageBays": 3,
-      "peakCommuteAvg": 45
+      "peakCommuteAvg": 45,
+      "peakCommuteMin": 35,
+      "peakCommuteMax": 55
     }
   ]
 }
