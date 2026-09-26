@@ -473,7 +473,7 @@
 
 <script>
 const bandRank = { Top: 0, Strong: 1, Mixed: 2 };
-const APP_BUILD = '2026-09-26d'; // bump on each deploy so phones can confirm they got latest
+const APP_BUILD = '2026-09-26e'; // bump on each deploy so phones can confirm they got latest
 const STORAGE_KEY = 'house-list-excludes-v1';
 const HIDE_KEY = 'house-list-hide-excluded-v1';
 const CAVEATS_KEY = 'house-list-caveats-open-v1';
@@ -718,7 +718,7 @@ function render() {
 
   const prio = sortedPriority(list);
   document.getElementById('panel-priority').innerHTML = tableWrap(
-    ['X', 'Address', 'Status', 'Price', 'Schools', 'High school', 'Rush', 'Min/Avg/Max', 'Golf', 'Basement', 'Garage', 'Link'],
+    ['X', 'Address', 'Status', 'Price', 'Schools', 'High school', 'Rush', 'Min/Avg/Max', 'Off-peak', 'Golf', 'Basement', 'Garage', 'Link'],
     prio.map((h) => `<tr class="${isExcluded(h) ? 'excluded' : ''}">
       ${excludeCell(h)}
       <td>${addrCell(h)}</td>
@@ -728,6 +728,7 @@ function render() {
       <td>${h.high}</td>
       <td>${h.commuteRush}</td>
       <td class="num">${rushTriple(h)}</td>
+      <td>${h.commuteOffPeak}</td>
       <td>${h.golfKind}</td>
       <td>${h.basement}</td>
       <td class="num">${garageLabel(h)}</td>
@@ -809,6 +810,7 @@ function render() {
           ${statusBadge(h)}
           ${bandBadge(h)}
           <span class="badge">peak ${rushTriple(h)}</span>
+          <span class="badge">off-peak ${h.commuteOffPeak}</span>
           <span class="badge">${h.basement} basement</span>
           <span class="badge">${garageLabel(h)}</span>
           <span class="badge">${h.golfKind}</span>
