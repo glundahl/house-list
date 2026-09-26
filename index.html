@@ -105,6 +105,7 @@
     flex-wrap: wrap;
     gap: 8px;
     margin-bottom: 14px;
+    align-items: center;
   }
   .filter {
     border: 1px solid var(--border);
@@ -120,6 +121,37 @@
     border-color: var(--accent2);
     color: var(--accent2);
   }
+  .commute-filter {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .commute-filter label { white-space: nowrap; }
+  .commute-filter input {
+    width: 64px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 6px 8px;
+    font: inherit;
+    font-size: 13px;
+  }
+  .commute-filter button {
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text-muted);
+    border-radius: 8px;
+    padding: 6px 10px;
+    font: inherit;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .commute-filter button:hover { color: var(--text); border-color: var(--accent2); }
   .callout {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -270,6 +302,11 @@
       <button class="filter active" data-filter="all">All status</button>
       <button class="filter" data-filter="Active">Active only</button>
       <button class="filter" data-filter="Top">Top schools</button>
+      <div class="commute-filter">
+        <label for="maxPeak">Max avg peak commute (min)</label>
+        <input id="maxPeak" type="number" min="1" max="120" step="1" placeholder="e.g. 40" inputmode="numeric">
+        <button type="button" id="clearPeak">Clear</button>
+      </div>
     </div>
 
     <div class="callout" id="caveats"></div>
@@ -289,18 +326,18 @@ const bandRank = { Top: 0, Strong: 1, Mixed: 2 };
 const money = (n) => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
 const statusClass = (s) => s === 'Active' ? 'active' : s === 'Sold' ? 'sold' : 'contract';
 const bandClass = (b) => b.toLowerCase();
-const rushStart = (s) => parseInt(String(s).split(/[–-]/)[0], 10) || 99;
 
 let DATA = null;
 let statusFilter = 'all';
 let schoolFilter = false;
+let maxPeakCommute = null;
 
 async function boot() {
   const res = await fetch('data/homes.json');
   DATA = await res.json();
   const h = DATA.meta.honeywell;
   document.getElementById('subtitle').textContent =
-    `Honeywell commute → ${h.address} (${h.note}). Updated ${DATA.meta.updated}.`;
+    `Honeywell commute → ${h.address} (${h.note}). Updated ${DATA.meta.updated}. Stats live in data/homes.json.`;
   document.getElementById('caveats').innerHTML =
     `<strong>Read this:</strong> ${DATA.meta.caveats.join(' ')}`;
   document.getElementById('footer').textContent =
@@ -328,12 +365,25 @@ function bindUi() {
       render();
     });
   });
+  const peakInput = document.getElementById('maxPeak');
+  peakInput.addEventListener('input', () => {
+    const v = peakInput.value.trim();
+    maxPeakCommute = v === '' ? null : Number(v);
+    if (maxPeakCommute !== null && Number.isNaN(maxPeakCommute)) maxPeakCommute = null;
+    render();
+  });
+  document.getElementById('clearPeak').addEventListener('click', () => {
+    peakInput.value = '';
+    maxPeakCommute = null;
+    render();
+  });
 }
 
 function filtered() {
   return DATA.homes.filter((h) => {
     if (statusFilter !== 'all' && h.status !== statusFilter) return false;
     if (schoolFilter && h.schoolBand !== 'Top') return false;
+    if (maxPeakCommute !== null && h.peakCommuteAvg > maxPeakCommute) return false;
     return true;
   });
 }
@@ -342,7 +392,7 @@ function sortedPriority(list) {
   return [...list].sort((a, b) => {
     const band = bandRank[a.schoolBand] - bandRank[b.schoolBand];
     if (band) return band;
-    const r = rushStart(a.commuteRush) - rushStart(b.commuteRush);
+    const r = (a.peakCommuteAvg ?? 99) - (b.peakCommuteAvg ?? 99);
     if (r) return r;
     return a.price - b.price;
   });
@@ -357,6 +407,10 @@ function statusBadge(h) {
 function bandBadge(h) {
   return `<span class="badge ${bandClass(h.schoolBand)}">${h.schoolBand}</span>`;
 }
+function garageLabel(h) {
+  const n = h.garageBays ?? h.garage ?? 0;
+  return n ? `${n}-car` : '—';
+}
 
 function tableWrap(headers, rowsHtml) {
   if (!rowsHtml) return `<div class="empty">No homes match this filter.</div>`;
@@ -367,16 +421,17 @@ function render() {
   const list = filtered();
   const active = DATA.homes.filter((h) => h.status === 'Active');
   const topActive = active.filter((h) => h.schoolBand === 'Top').length;
+  const peakNote = maxPeakCommute !== null ? ` · peak ≤ ${maxPeakCommute} min` : '';
   document.getElementById('stats').innerHTML = [
     `<span class="pill on">${DATA.homes.length} homes</span>`,
     `<span class="pill">${active.length} active</span>`,
     `<span class="pill">${topActive} active · Top schools</span>`,
-    `<span class="pill">Showing ${list.length}</span>`,
+    `<span class="pill">Showing ${list.length}${peakNote}</span>`,
   ].join('');
 
   const prio = sortedPriority(list);
   document.getElementById('panel-priority').innerHTML = tableWrap(
-    ['Address', 'Status', 'Price', 'Schools', 'High school', 'Rush → Honeywell', 'Off-peak', 'Golf', 'Link'],
+    ['Address', 'Status', 'Price', 'Schools', 'High school', 'Rush', 'Avg peak', 'Golf', 'Basement', 'Garage', 'Link'],
     prio.map((h) => `<tr>
       <td>${addrCell(h)}</td>
       <td>${statusBadge(h)}</td>
@@ -384,8 +439,10 @@ function render() {
       <td>${bandBadge(h)}</td>
       <td>${h.high}</td>
       <td>${h.commuteRush}</td>
-      <td>${h.commuteOffPeak}</td>
+      <td class="num">${h.peakCommuteAvg} min</td>
       <td>${h.golfKind}</td>
+      <td>${h.basement}</td>
+      <td class="num">${garageLabel(h)}</td>
       <td><a class="link" href="${h.url}" target="_blank" rel="noopener">Open</a></td>
     </tr>`).join('')
   );
@@ -403,10 +460,11 @@ function render() {
   );
 
   document.getElementById('panel-commute').innerHTML = tableWrap(
-    ['Address', 'Rush', 'Off-peak', 'Route', 'Price'],
-    [...list].sort((a, b) => rushStart(a.commuteRush) - rushStart(b.commuteRush)).map((h) => `<tr>
+    ['Address', 'Rush range', 'Avg peak', 'Off-peak', 'Route', 'Price'],
+    [...list].sort((a, b) => (a.peakCommuteAvg ?? 99) - (b.peakCommuteAvg ?? 99)).map((h) => `<tr>
       <td>${addrCell(h)}</td>
       <td>${h.commuteRush}</td>
+      <td class="num">${h.peakCommuteAvg} min</td>
       <td>${h.commuteOffPeak}</td>
       <td>${h.commuteRoute}</td>
       <td class="num">${money(h.price)}</td>
@@ -424,7 +482,7 @@ function render() {
   );
 
   document.getElementById('panel-all').innerHTML = tableWrap(
-    ['Address', 'Status', 'Price', 'Beds/Baths', 'Sq Ft', '$/Sq Ft', 'Lot', 'Year', 'HOA/mo', 'Pool', 'Link'],
+    ['Address', 'Status', 'Price', 'Beds/Baths', 'Sq Ft', '$/Sq Ft', 'Lot', 'Year', 'HOA/mo', 'Pool', 'Basement', 'Garage', 'Link'],
     [...list].sort((a, b) => b.price - a.price).map((h) => `<tr>
       <td>${addrCell(h)}</td>
       <td>${statusBadge(h)}</td>
@@ -436,6 +494,8 @@ function render() {
       <td class="num">${h.year}</td>
       <td class="num">${money(h.hoaMo)}</td>
       <td>${h.pool}</td>
+      <td>${h.basement}</td>
+      <td class="num">${garageLabel(h)}</td>
       <td><a class="link" href="${h.url}" target="_blank" rel="noopener">Open</a></td>
     </tr>`).join('')
   );
@@ -453,7 +513,9 @@ function render() {
         <div class="card-tags">
           ${statusBadge(h)}
           ${bandBadge(h)}
-          <span class="badge">${h.commuteRush} rush</span>
+          <span class="badge">avg peak ${h.peakCommuteAvg} min</span>
+          <span class="badge">${h.basement} basement</span>
+          <span class="badge">${garageLabel(h)}</span>
           <span class="badge">${h.golfKind}</span>
         </div>
         <p><strong>${h.high}</strong> · ${h.beds}bd / ${h.baths}ba · ${h.sqft.toLocaleString()} sqft · ${h.lotAcres} ac</p>

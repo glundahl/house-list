@@ -13,7 +13,8 @@
       "GreatSchools ratings where cited; confirm school assignment with the district before offer.",
       "Bromley appears once (Redfin + Zillow were the same home).",
       "Prices and status change daily — verify on the listing link.",
-      "Pleasant Wyatt added from OneHome (MLS #4409483) on 2026-09-26."
+      "Pleasant Wyatt added from OneHome (MLS #4409483) on 2026-09-26.",
+      "Basement values: None / Finished / Unfinished. peakCommuteAvg is the midpoint of the estimated rush-hour range to Honeywell."
     ]
   },
   "homes": [
@@ -47,10 +48,13 @@
       "commuteRoute": "I-77 S → Uptown / Mint St",
       "golf": "River Run Country Club optional (golf, tennis, social) — membership separate from HOA",
       "golfKind": "Club in community",
-      "dom": "98–99",
-      "highlights": "Back on market (buyer financing). Thermador kitchen, outdoor fireplace.",
+      "dom": "99–100",
+      "highlights": "Back on market (buyer financing). Thermador kitchen, outdoor fireplace. Finished walk-out basement w/ 2nd kitchen.",
       "source": "Redfin",
-      "url": "https://www.redfin.com/NC/Davidson/16830-Reinsch-Dr-28036/home/52433655"
+      "url": "https://www.redfin.com/NC/Davidson/16830-Reinsch-Dr-28036/home/52433655",
+      "basement": "Finished",
+      "garageBays": 3,
+      "peakCommuteAvg": 45
     },
     {
       "id": "pleasant-wyatt",
@@ -85,7 +89,10 @@
       "dom": "47",
       "highlights": "Simonini / Christopher Phelps. Cul-de-sac. Main-level primary, rebuilt kitchen (Sub-Zero, 48\" range), spa bath, pool cabana. Open house Sep 26 1–3pm. Price cut from $2,199,999.",
       "source": "OneHome / Coldwell",
-      "url": "https://www.coldwellbankerhomes.com/nc/charlotte/11808-pleasant-wyatt-pl/pid_72990020/"
+      "url": "https://www.coldwellbankerhomes.com/nc/charlotte/11808-pleasant-wyatt-pl/pid_72990020/",
+      "basement": "None",
+      "garageBays": 3,
+      "peakCommuteAvg": 42
     },
     {
       "id": "ellison",
@@ -120,7 +127,10 @@
       "dom": "~60+",
       "highlights": "Price cut ~$290K from $2.29M. Newest build on list.",
       "source": "Zillow / Compass",
-      "url": "https://www.zillow.com/homedetails/128-Ellison-Way-Waxhaw-NC-28173/348729540_zpid/"
+      "url": "https://www.zillow.com/homedetails/128-Ellison-Way-Waxhaw-NC-28173/348729540_zpid/",
+      "basement": "None",
+      "garageBays": 3,
+      "peakCommuteAvg": 55
     },
     {
       "id": "reflection",
@@ -155,7 +165,10 @@
       "dom": "218–219",
       "highlights": "2024 custom. Just cut $100K. Water views; room for future pool.",
       "source": "Redfin",
-      "url": "https://www.redfin.com/NC/Belmont/1521-Reflection-Pointe-Blvd-28012/home/44575605"
+      "url": "https://www.redfin.com/NC/Belmont/1521-Reflection-Pointe-Blvd-28012/home/44575605",
+      "basement": "Finished",
+      "garageBays": 2,
+      "peakCommuteAvg": 32
     },
     {
       "id": "bannerman",
@@ -190,7 +203,10 @@
       "dom": "95",
       "highlights": "Golf-course views. Fire pit, outdoor kitchen.",
       "source": "Zillow",
-      "url": "https://www.zillow.com/homedetails/746-Bannerman-Ln-Fort-Mill-SC-29715/90067858_zpid/"
+      "url": "https://www.zillow.com/homedetails/746-Bannerman-Ln-Fort-Mill-SC-29715/90067858_zpid/",
+      "basement": "None",
+      "garageBays": 3,
+      "peakCommuteAvg": 48
     },
     {
       "id": "ashford",
@@ -225,7 +241,10 @@
       "dom": "74",
       "highlights": "Heavy renovations. New roof 2024, Tesla charger, vehicle lift.",
       "source": "Zillow",
-      "url": "https://www.zillow.com/homedetails/3030-Ashford-Glen-Dr-Matthews-NC-28104/58462104_zpid/"
+      "url": "https://www.zillow.com/homedetails/3030-Ashford-Glen-Dr-Matthews-NC-28104/58462104_zpid/",
+      "basement": "None",
+      "garageBays": 3,
+      "peakCommuteAvg": 55
     },
     {
       "id": "wyndham",
@@ -260,7 +279,10 @@
       "dom": "13",
       "highlights": "Under contract — no show. Guest house unpermitted.",
       "source": "Zillow / CapCenter",
-      "url": "https://www.zillow.com/homedetails/15304-Wyndham-Oaks-Dr-Charlotte-NC-28277/125831676_zpid/"
+      "url": "https://www.zillow.com/homedetails/15304-Wyndham-Oaks-Dr-Charlotte-NC-28277/125831676_zpid/",
+      "basement": "None",
+      "garageBays": 3,
+      "peakCommuteAvg": 42
     },
     {
       "id": "sommerton",
@@ -295,7 +317,10 @@
       "dom": "15–16",
       "highlights": "2+ acre lot. Fresh listing. Near Ballantyne.",
       "source": "Redfin",
-      "url": "https://www.redfin.com/SC/Indian-Land/2324-Sommerton-Gln-29707/home/52334352"
+      "url": "https://www.redfin.com/SC/Indian-Land/2324-Sommerton-Gln-29707/home/52334352",
+      "basement": "Finished",
+      "garageBays": 3,
+      "peakCommuteAvg": 55
     },
     {
       "id": "ocaso",
@@ -330,7 +355,10 @@
       "dom": "63",
       "highlights": "2+ acres. Well irrigation. Lender credit offer (conditions).",
       "source": "Redfin",
-      "url": "https://www.redfin.com/NC/Matthews/3003-Ocaso-Ct-28104/home/43843190"
+      "url": "https://www.redfin.com/NC/Matthews/3003-Ocaso-Ct-28104/home/43843190",
+      "basement": "Finished",
+      "garageBays": 3,
+      "peakCommuteAvg": 55
     },
     {
       "id": "piper",
@@ -365,7 +393,10 @@
       "dom": "Sold 9/25/26",
       "highlights": "Sold 9/25 for $1.55M. French one-level.",
       "source": "Redfin",
-      "url": "https://www.redfin.com/NC/Charlotte/4935-Piper-Glen-Dr-28277/home/44047029"
+      "url": "https://www.redfin.com/NC/Charlotte/4935-Piper-Glen-Dr-28277/home/44047029",
+      "basement": "None",
+      "garageBays": 2,
+      "peakCommuteAvg": 42
     },
     {
       "id": "bromley",
@@ -400,7 +431,10 @@
       "dom": "134–135",
       "highlights": "Best $/sqft among larger homes. Multi-gen basement suite.",
       "source": "Redfin / Zillow",
-      "url": "https://redf.in/9kRVgA"
+      "url": "https://redf.in/9kRVgA",
+      "basement": "Finished",
+      "garageBays": 3,
+      "peakCommuteAvg": 55
     },
     {
       "id": "waterview",
@@ -435,7 +469,10 @@
       "dom": "~100+",
       "highlights": "Water views, one-owner. Strong commute + value.",
       "source": "Coldwell / Gonzalez",
-      "url": "https://www.realtor.com/realestateandhomes-detail/8041-Water-View-Dr_Belmont_NC_28012_M65488-06354"
+      "url": "https://www.realtor.com/realestateandhomes-detail/8041-Water-View-Dr_Belmont_NC_28012_M65488-06354",
+      "basement": "Finished",
+      "garageBays": 3,
+      "peakCommuteAvg": 32
     },
     {
       "id": "reliance",
@@ -470,7 +507,10 @@
       "dom": "28–29",
       "highlights": "Lowest ask + $/sqft. Renovated kitchen, huge deck.",
       "source": "Redfin",
-      "url": "https://www.redfin.com/SC/Tega-Cay/638-Reliance-Ct-29708/home/52077062"
+      "url": "https://www.redfin.com/SC/Tega-Cay/638-Reliance-Ct-29708/home/52077062",
+      "basement": "Finished",
+      "garageBays": 3,
+      "peakCommuteAvg": 45
     }
   ]
 }
