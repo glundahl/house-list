@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>House List</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #1c2330;
+    --border: #30363d;
+    --accent: #f0883e;
+    --accent2: #58a6ff;
+    --text: #e6edf3;
+    --text-muted: #7d8590;
+    --ok: #3fb950;
+    --warn: #d29922;
+    --bad: #f78166;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 48px;
+  }
+  .header {
+    border-bottom: 1px solid var(--border);
+    padding: 28px 16px 20px;
+    text-align: center;
+    background: var(--surface);
+  }
+  .header-label {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  .header h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(24px, 5vw, 36px);
+    font-weight: 800;
+  }
+  .header h1 span { color: var(--accent); }
+  .header-sub {
+    margin-top: 8px;
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 300;
+    max-width: 520px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.45;
+  }
+  .pill-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 14px;
+  }
+  .pill {
+    font-size: 12px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text-muted);
+  }
+  .pill.on { border-color: var(--accent); color: var(--accent); }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 16px; }
+  .tabs {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    margin-bottom: 14px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .tab {
+    flex: 0 0 auto;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-muted);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .tab.active {
+    color: var(--text);
+    border-color: var(--accent);
+    background: var(--surface2);
+  }
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .filter {
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-muted);
+    border-radius: 999px;
+    padding: 6px 12px;
+    font: inherit;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .filter.active {
+    border-color: var(--accent2);
+    color: var(--accent2);
+  }
+  .callout {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent2);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.45;
+    margin-bottom: 16px;
+  }
+  .callout strong { color: var(--text); font-weight: 600; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    min-width: 720px;
+  }
+  th, td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  th {
+    position: sticky;
+    top: 0;
+    background: var(--surface2);
+    color: var(--text-muted);
+    font-weight: 500;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    white-space: nowrap;
+  }
+  tr:last-child td { border-bottom: none; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .addr { font-weight: 600; color: var(--text); }
+  .city { display: block; font-size: 12px; color: var(--text-muted); font-weight: 400; margin-top: 2px; }
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .badge.top { color: var(--ok); border-color: #238636; }
+  .badge.strong { color: var(--accent2); border-color: #1f6feb; }
+  .badge.mixed { color: var(--warn); border-color: #9e6a03; }
+  .badge.active { color: var(--ok); }
+  .badge.contract { color: var(--warn); }
+  .badge.sold { color: var(--bad); }
+  a.link {
+    color: var(--accent2);
+    text-decoration: none;
+    font-weight: 500;
+  }
+  a.link:hover { text-decoration: underline; }
+  .cards {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  @media (min-width: 700px) {
+    .cards { grid-template-columns: 1fr 1fr; }
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+  }
+  .card-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    align-items: flex-start;
+    margin-bottom: 8px;
+  }
+  .card h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+  }
+  .price {
+    font-weight: 600;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+  .meta {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+  .card p {
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--text);
+    margin-bottom: 10px;
+  }
+  .card-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .footer {
+    margin-top: 24px;
+    font-size: 12px;
+    color: var(--text-muted);
+    text-align: center;
+    line-height: 1.5;
+  }
+  .empty {
+    padding: 28px;
+    text-align: center;
+    color: var(--text-muted);
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+  }
+</style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-label">Family compare · Charlotte metro</div>
+    <h1>House <span>List</span></h1>
+    <p class="header-sub" id="subtitle">Loading…</p>
+    <div class="pill-row" id="stats"></div>
+  </header>
+
+  <main class="wrap">
+    <div class="tabs" role="tablist">
+      <button class="tab active" data-panel="priority">Priority</button>
+      <button class="tab" data-panel="schools">Schools</button>
+      <button class="tab" data-panel="commute">Commute</button>
+      <button class="tab" data-panel="golf">Golf</button>
+      <button class="tab" data-panel="cards">Cards</button>
+      <button class="tab" data-panel="all">All specs</button>
+    </div>
+
+    <div class="filters">
+      <button class="filter active" data-filter="all">All status</button>
+      <button class="filter" data-filter="Active">Active only</button>
+      <button class="filter" data-filter="Top">Top schools</button>
+    </div>
+
+    <div class="callout" id="caveats"></div>
+
+    <section class="panel active" id="panel-priority"></section>
+    <section class="panel" id="panel-schools"></section>
+    <section class="panel" id="panel-commute"></section>
+    <section class="panel" id="panel-golf"></section>
+    <section class="panel" id="panel-cards"></section>
+    <section class="panel" id="panel-all"></section>
+
+    <p class="footer" id="footer"></p>
+  </main>
+
+<script>
+const bandRank = { Top: 0, Strong: 1, Mixed: 2 };
+const money = (n) => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+const statusClass = (s) => s === 'Active' ? 'active' : s === 'Sold' ? 'sold' : 'contract';
+const bandClass = (b) => b.toLowerCase();
+const rushStart = (s) => parseInt(String(s).split(/[–-]/)[0], 10) || 99;
+
+let DATA = null;
+let statusFilter = 'all';
+let schoolFilter = false;
+
+async function boot() {
+  const res = await fetch('data/homes.json');
+  DATA = await res.json();
+  const h = DATA.meta.honeywell;
+  document.getElementById('subtitle').textContent =
+    `Honeywell commute → ${h.address} (${h.note}). Updated ${DATA.meta.updated}.`;
+  document.getElementById('caveats').innerHTML =
+    `<strong>Read this:</strong> ${DATA.meta.caveats.join(' ')}`;
+  document.getElementById('footer').textContent =
+    'Same idea as quiz-mechanic — static GitHub Pages. Listing links open Redfin / Zillow / Realtor.';
+  bindUi();
+  render();
+}
+
+function bindUi() {
+  document.querySelectorAll('.tab').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach((b) => b.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach((p) => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('panel-' + btn.dataset.panel).classList.add('active');
+    });
+  });
+  document.querySelectorAll('.filter').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter').forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      const f = btn.dataset.filter;
+      statusFilter = f === 'Active' ? 'Active' : 'all';
+      schoolFilter = f === 'Top';
+      render();
+    });
+  });
+}
+
+function filtered() {
+  return DATA.homes.filter((h) => {
+    if (statusFilter !== 'all' && h.status !== statusFilter) return false;
+    if (schoolFilter && h.schoolBand !== 'Top') return false;
+    return true;
+  });
+}
+
+function sortedPriority(list) {
+  return [...list].sort((a, b) => {
+    const band = bandRank[a.schoolBand] - bandRank[b.schoolBand];
+    if (band) return band;
+    const r = rushStart(a.commuteRush) - rushStart(b.commuteRush);
+    if (r) return r;
+    return a.price - b.price;
+  });
+}
+
+function addrCell(h) {
+  return `<div class="addr">${h.address}<span class="city">${h.city}, ${h.state} ${h.zip}</span></div>`;
+}
+function statusBadge(h) {
+  return `<span class="badge ${statusClass(h.status)}">${h.status}</span>`;
+}
+function bandBadge(h) {
+  return `<span class="badge ${bandClass(h.schoolBand)}">${h.schoolBand}</span>`;
+}
+
+function tableWrap(headers, rowsHtml) {
+  if (!rowsHtml) return `<div class="empty">No homes match this filter.</div>`;
+  return `<div class="table-scroll"><table><thead><tr>${headers.map((h) => `<th>${h}</th>`).join('')}</tr></thead><tbody>${rowsHtml}</tbody></table></div>`;
+}
+
+function render() {
+  const list = filtered();
+  const active = DATA.homes.filter((h) => h.status === 'Active');
+  const topActive = active.filter((h) => h.schoolBand === 'Top').length;
+  document.getElementById('stats').innerHTML = [
+    `<span class="pill on">${DATA.homes.length} homes</span>`,
+    `<span class="pill">${active.length} active</span>`,
+    `<span class="pill">${topActive} active · Top schools</span>`,
+    `<span class="pill">Showing ${list.length}</span>`,
+  ].join('');
+
+  const prio = sortedPriority(list);
+  document.getElementById('panel-priority').innerHTML = tableWrap(
+    ['Address', 'Status', 'Price', 'Schools', 'High school', 'Rush → Honeywell', 'Off-peak', 'Golf', 'Link'],
+    prio.map((h) => `<tr>
+      <td>${addrCell(h)}</td>
+      <td>${statusBadge(h)}</td>
+      <td class="num">${money(h.price)}</td>
+      <td>${bandBadge(h)}</td>
+      <td>${h.high}</td>
+      <td>${h.commuteRush}</td>
+      <td>${h.commuteOffPeak}</td>
+      <td>${h.golfKind}</td>
+      <td><a class="link" href="${h.url}" target="_blank" rel="noopener">Open</a></td>
+    </tr>`).join('')
+  );
+
+  document.getElementById('panel-schools').innerHTML = tableWrap(
+    ['Address', 'Band', 'Elementary', 'Middle', 'High', 'Note'],
+    list.map((h) => `<tr>
+      <td>${addrCell(h)}</td>
+      <td>${bandBadge(h)}</td>
+      <td>${h.elem}</td>
+      <td>${h.middle}</td>
+      <td>${h.high}</td>
+      <td>${h.schoolNote}</td>
+    </tr>`).join('')
+  );
+
+  document.getElementById('panel-commute').innerHTML = tableWrap(
+    ['Address', 'Rush', 'Off-peak', 'Route', 'Price'],
+    [...list].sort((a, b) => rushStart(a.commuteRush) - rushStart(b.commuteRush)).map((h) => `<tr>
+      <td>${addrCell(h)}</td>
+      <td>${h.commuteRush}</td>
+      <td>${h.commuteOffPeak}</td>
+      <td>${h.commuteRoute}</td>
+      <td class="num">${money(h.price)}</td>
+    </tr>`).join('')
+  );
+
+  document.getElementById('panel-golf').innerHTML = tableWrap(
+    ['Address', 'Access', 'Detail', 'Link'],
+    list.map((h) => `<tr>
+      <td>${addrCell(h)}</td>
+      <td>${h.golfKind}</td>
+      <td>${h.golf}</td>
+      <td><a class="link" href="${h.url}" target="_blank" rel="noopener">Open</a></td>
+    </tr>`).join('')
+  );
+
+  document.getElementById('panel-all').innerHTML = tableWrap(
+    ['Address', 'Status', 'Price', 'Beds/Baths', 'Sq Ft', '$/Sq Ft', 'Lot', 'Year', 'HOA/mo', 'Pool', 'Link'],
+    [...list].sort((a, b) => b.price - a.price).map((h) => `<tr>
+      <td>${addrCell(h)}</td>
+      <td>${statusBadge(h)}</td>
+      <td class="num">${money(h.price)}</td>
+      <td>${h.beds} / ${h.baths}</td>
+      <td class="num">${h.sqft.toLocaleString()}</td>
+      <td class="num">$${h.ppsf}</td>
+      <td class="num">${h.lotAcres} ac</td>
+      <td class="num">${h.year}</td>
+      <td class="num">${money(h.hoaMo)}</td>
+      <td>${h.pool}</td>
+      <td><a class="link" href="${h.url}" target="_blank" rel="noopener">Open</a></td>
+    </tr>`).join('')
+  );
+
+  document.getElementById('panel-cards').innerHTML = list.length
+    ? `<div class="cards">${prio.map((h) => `
+      <article class="card">
+        <div class="card-top">
+          <div>
+            <h3>${h.address}</h3>
+            <div class="meta">${h.city}, ${h.state} · ${h.community}</div>
+          </div>
+          <div class="price">${money(h.price)}</div>
+        </div>
+        <div class="card-tags">
+          ${statusBadge(h)}
+          ${bandBadge(h)}
+          <span class="badge">${h.commuteRush} rush</span>
+          <span class="badge">${h.golfKind}</span>
+        </div>
+        <p><strong>${h.high}</strong> · ${h.beds}bd / ${h.baths}ba · ${h.sqft.toLocaleString()} sqft · ${h.lotAcres} ac</p>
+        <p>${h.highlights}</p>
+        <a class="link" href="${h.url}" target="_blank" rel="noopener">Open listing →</a>
+      </article>`).join('')}</div>`
+    : `<div class="empty">No homes match this filter.</div>`;
+}
+
+boot().catch((err) => {
+  document.getElementById('subtitle').textContent = 'Failed to load data/homes.json — ' + err.message;
+});
+</script>
+</body>
+</html>
