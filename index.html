@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
 <title>House List</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -396,6 +398,16 @@
     cursor: pointer;
   }
   .personal-bar button:hover { color: var(--text); }
+  .personal-bar button.reload-latest {
+    border-color: var(--accent);
+    color: var(--accent);
+    margin-left: auto;
+  }
+  .build-tag {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
 </style>
 </head>
 <body>
@@ -440,6 +452,8 @@
       </label>
       <button type="button" id="clearExcludes">Clear my excludes</button>
       <span id="excludeCount"></span>
+      <button type="button" class="reload-latest" id="reloadLatest" title="Clear cache and fetch the newest site build">Reload latest</button>
+      <span class="build-tag" id="buildTag"></span>
     </div>
 
     <details class="callout" id="caveats">
@@ -459,6 +473,7 @@
 
 <script>
 const bandRank = { Top: 0, Strong: 1, Mixed: 2 };
+const APP_BUILD = '2026-09-26d'; // bump on each deploy so phones can confirm they got latest
 const STORAGE_KEY = 'house-list-excludes-v1';
 const HIDE_KEY = 'house-list-hide-excluded-v1';
 const CAVEATS_KEY = 'house-list-caveats-open-v1';
@@ -473,6 +488,27 @@ let maxPeakCommute = null;
 let peakMode = 'avg'; // min | avg | max
 let excludedIds = new Set();
 let hideExcluded = false;
+
+async function clearSiteCaches() {
+  if (!('caches' in window)) return;
+  try {
+    const keys = await caches.keys();
+    await Promise.all(keys.map((k) => caches.delete(k)));
+  } catch (_) { /* ignore */ }
+}
+
+async function forceReloadLatest() {
+  const btn = document.getElementById('reloadLatest');
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Updating…';
+  }
+  await clearSiteCaches();
+  const url = new URL(location.href);
+  url.searchParams.set('_', String(Date.now()));
+  url.searchParams.set('build', APP_BUILD);
+  location.replace(url.toString());
+}
 
 function loadPersonal() {
   try {
@@ -516,14 +552,16 @@ function peakModeLabel() {
 
 async function boot() {
   loadPersonal();
-  const res = await fetch('data/homes.json');
+  document.getElementById('buildTag').textContent = `build ${APP_BUILD}`;
+  const res = await fetch(`data/homes.json?_=${Date.now()}`, { cache: 'no-store' });
   DATA = await res.json();
   const h = DATA.meta.honeywell;
   document.getElementById('subtitle').textContent =
     `Honeywell commute → ${h.address} (${h.note}). Updated ${DATA.meta.updated}.`;
   document.getElementById('caveatsBody').innerHTML =
     `<strong>Read this:</strong> ${DATA.meta.caveats.join(' ')} ` +
-    `<strong>Personal excludes</strong> are saved on this device/browser only (not shared).`;
+    `<strong>Personal excludes</strong> are saved on this device/browser only (not shared). ` +
+    `Tap <strong>Reload latest</strong> if the home-screen app looks stale (iPhone and Android).`;
   const caveatsEl = document.getElementById('caveats');
   // First visit: open once. After that, remember last open/closed (default closed).
   const seenCaveats = localStorage.getItem(CAVEATS_KEY);
@@ -539,7 +577,7 @@ async function boot() {
     } catch (_) { /* ignore */ }
   });
   document.getElementById('footer').textContent =
-    'Excludes persist in this browser via localStorage. Clearing site data resets them.';
+    `Excludes persist in this browser. Build ${APP_BUILD} — use Reload latest to pull updates.`;
   const hideEl = document.getElementById('hideExcluded');
   hideEl.checked = hideExcluded;
   document.getElementById('hideExcludedLabel').classList.toggle('on', hideExcluded);
@@ -596,6 +634,9 @@ function bindUi() {
     excludedIds.clear();
     savePersonal();
     render();
+  });
+  document.getElementById('reloadLatest').addEventListener('click', () => {
+    forceReloadLatest();
   });
   document.querySelector('main.wrap').addEventListener('change', (e) => {
     const t = e.target;
