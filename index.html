@@ -183,13 +183,40 @@
     border: 1px solid var(--border);
     border-left: 3px solid var(--accent2);
     border-radius: var(--radius);
-    padding: 12px 14px;
+    padding: 0;
     font-size: 13px;
     color: var(--text-muted);
     line-height: 1.45;
     margin-bottom: 16px;
   }
   .callout strong { color: var(--text); font-weight: 600; }
+  .callout > summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 12px 14px;
+    font-weight: 500;
+    color: var(--text);
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .callout > summary::-webkit-details-marker { display: none; }
+  .callout > summary::after {
+    content: 'Show';
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--accent2);
+    flex-shrink: 0;
+  }
+  .callout[open] > summary::after { content: 'Hide'; }
+  .callout-body {
+    padding: 0 14px 12px;
+    border-top: 1px solid var(--border);
+    padding-top: 10px;
+    margin: 0 14px 0;
+  }
   .panel { display: none; }
   .panel.active { display: block; }
   .table-scroll {
@@ -415,7 +442,10 @@
       <span id="excludeCount"></span>
     </div>
 
-    <div class="callout" id="caveats"></div>
+    <details class="callout" id="caveats">
+      <summary>Notes &amp; caveats</summary>
+      <div class="callout-body" id="caveatsBody"></div>
+    </details>
 
     <section class="panel active" id="panel-priority"></section>
     <section class="panel" id="panel-schools"></section>
@@ -431,6 +461,7 @@
 const bandRank = { Top: 0, Strong: 1, Mixed: 2 };
 const STORAGE_KEY = 'house-list-excludes-v1';
 const HIDE_KEY = 'house-list-hide-excluded-v1';
+const CAVEATS_KEY = 'house-list-caveats-open-v1';
 const money = (n) => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
 const statusClass = (s) => s === 'Active' ? 'active' : s === 'Sold' ? 'sold' : 'contract';
 const bandClass = (b) => b.toLowerCase();
@@ -490,9 +521,23 @@ async function boot() {
   const h = DATA.meta.honeywell;
   document.getElementById('subtitle').textContent =
     `Honeywell commute → ${h.address} (${h.note}). Updated ${DATA.meta.updated}.`;
-  document.getElementById('caveats').innerHTML =
+  document.getElementById('caveatsBody').innerHTML =
     `<strong>Read this:</strong> ${DATA.meta.caveats.join(' ')} ` +
     `<strong>Personal excludes</strong> are saved on this device/browser only (not shared).`;
+  const caveatsEl = document.getElementById('caveats');
+  // First visit: open once. After that, remember last open/closed (default closed).
+  const seenCaveats = localStorage.getItem(CAVEATS_KEY);
+  if (seenCaveats === null) {
+    caveatsEl.open = true;
+    localStorage.setItem(CAVEATS_KEY, '0'); // next loads start collapsed
+  } else {
+    caveatsEl.open = seenCaveats === '1';
+  }
+  caveatsEl.addEventListener('toggle', () => {
+    try {
+      localStorage.setItem(CAVEATS_KEY, caveatsEl.open ? '1' : '0');
+    } catch (_) { /* ignore */ }
+  });
   document.getElementById('footer').textContent =
     'Excludes persist in this browser via localStorage. Clearing site data resets them.';
   const hideEl = document.getElementById('hideExcluded');
