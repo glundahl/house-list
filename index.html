@@ -304,6 +304,71 @@
     border: 1px dashed var(--border);
     border-radius: var(--radius);
   }
+  .exclude-cell {
+    width: 44px;
+    text-align: center;
+    vertical-align: middle;
+  }
+  .exclude-cell input,
+  .card-exclude input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--bad);
+    cursor: pointer;
+  }
+  th.exclude-cell { font-size: 10px; letter-spacing: .02em; }
+  tr.excluded td { opacity: 0.45; }
+  tr.excluded .addr { text-decoration: line-through; }
+  .card.excluded { opacity: 0.5; border-style: dashed; }
+  .card-exclude {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+  .personal-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 12px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .personal-bar .toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 10px;
+    background: var(--surface);
+    cursor: pointer;
+    user-select: none;
+  }
+  .personal-bar .toggle input {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--accent2);
+    cursor: pointer;
+  }
+  .personal-bar .toggle.on {
+    border-color: var(--accent2);
+    color: var(--accent2);
+  }
+  .personal-bar button {
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text-muted);
+    border-radius: 8px;
+    padding: 6px 10px;
+    font: inherit;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .personal-bar button:hover { color: var(--text); }
 </style>
 </head>
 <body>
@@ -341,6 +406,15 @@
       </div>
     </div>
 
+    <div class="personal-bar">
+      <label class="toggle" id="hideExcludedLabel">
+        <input type="checkbox" id="hideExcluded">
+        Hide excluded
+      </label>
+      <button type="button" id="clearExcludes">Clear my excludes</button>
+      <span id="excludeCount"></span>
+    </div>
+
     <div class="callout" id="caveats"></div>
 
     <section class="panel active" id="panel-priority"></section>
@@ -355,6 +429,8 @@
 
 <script>
 const bandRank = { Top: 0, Strong: 1, Mixed: 2 };
+const STORAGE_KEY = 'house-list-excludes-v1';
+const HIDE_KEY = 'house-list-hide-excluded-v1';
 const money = (n) => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
 const statusClass = (s) => s === 'Active' ? 'active' : s === 'Sold' ? 'sold' : 'contract';
 const bandClass = (b) => b.toLowerCase();
@@ -364,6 +440,38 @@ let statusFilter = 'all';
 let schoolFilter = false;
 let maxPeakCommute = null;
 let peakMode = 'avg'; // min | avg | max
+let excludedIds = new Set();
+let hideExcluded = false;
+
+function loadPersonal() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    const arr = raw ? JSON.parse(raw) : [];
+    excludedIds = new Set(Array.isArray(arr) ? arr : []);
+    hideExcluded = localStorage.getItem(HIDE_KEY) === '1';
+  } catch (_) {
+    excludedIds = new Set();
+    hideExcluded = false;
+  }
+}
+
+function savePersonal() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify([...excludedIds]));
+    localStorage.setItem(HIDE_KEY, hideExcluded ? '1' : '0');
+  } catch (_) { /* private mode / quota */ }
+}
+
+function isExcluded(h) {
+  return excludedIds.has(h.id);
+}
+
+function setExcluded(id, on) {
+  if (on) excludedIds.add(id);
+  else excludedIds.delete(id);
+  savePersonal();
+  render();
+}
 
 function peakValue(h) {
   if (peakMode === 'min') return h.peakCommuteMin ?? h.peakCommuteAvg ?? 99;
@@ -376,15 +484,20 @@ function peakModeLabel() {
 }
 
 async function boot() {
+  loadPersonal();
   const res = await fetch('data/homes.json');
   DATA = await res.json();
   const h = DATA.meta.honeywell;
   document.getElementById('subtitle').textContent =
-    `Honeywell commute → ${h.address} (${h.note}). Updated ${DATA.meta.updated}. Stats live in data/homes.json.`;
+    `Honeywell commute → ${h.address} (${h.note}). Updated ${DATA.meta.updated}.`;
   document.getElementById('caveats').innerHTML =
-    `<strong>Read this:</strong> ${DATA.meta.caveats.join(' ')}`;
+    `<strong>Read this:</strong> ${DATA.meta.caveats.join(' ')} ` +
+    `<strong>Personal excludes</strong> are saved on this device/browser only (not shared).`;
   document.getElementById('footer').textContent =
-    'Same idea as quiz-mechanic — static GitHub Pages. Listing links open Redfin / Zillow / Realtor.';
+    'Excludes persist in this browser via localStorage. Clearing site data resets them.';
+  const hideEl = document.getElementById('hideExcluded');
+  hideEl.checked = hideExcluded;
+  document.getElementById('hideExcludedLabel').classList.toggle('on', hideExcluded);
   bindUi();
   render();
 }
@@ -427,6 +540,24 @@ function bindUi() {
     maxPeakCommute = null;
     render();
   });
+  document.getElementById('hideExcluded').addEventListener('change', (e) => {
+    hideExcluded = e.target.checked;
+    document.getElementById('hideExcludedLabel').classList.toggle('on', hideExcluded);
+    savePersonal();
+    render();
+  });
+  document.getElementById('clearExcludes').addEventListener('click', () => {
+    if (excludedIds.size && !confirm('Clear all personal excludes on this device?')) return;
+    excludedIds.clear();
+    savePersonal();
+    render();
+  });
+  document.querySelector('main.wrap').addEventListener('change', (e) => {
+    const t = e.target;
+    if (t && t.matches('input.exclude-toggle')) {
+      setExcluded(t.dataset.id, t.checked);
+    }
+  });
 }
 
 function filtered() {
@@ -434,6 +565,7 @@ function filtered() {
     if (statusFilter !== 'all' && h.status !== statusFilter) return false;
     if (schoolFilter && h.schoolBand !== 'Top') return false;
     if (maxPeakCommute !== null && peakValue(h) > maxPeakCommute) return false;
+    if (hideExcluded && isExcluded(h)) return false;
     return true;
   });
 }
@@ -464,10 +596,20 @@ function garageLabel(h) {
 function rushTriple(h) {
   return `${h.peakCommuteMin ?? '—'} / ${h.peakCommuteAvg ?? '—'} / ${h.peakCommuteMax ?? '—'}`;
 }
+function excludeCell(h) {
+  const on = isExcluded(h);
+  return `<td class="exclude-cell"><input class="exclude-toggle" type="checkbox" data-id="${h.id}" ${on ? 'checked' : ''} title="Exclude from my list" aria-label="Exclude ${h.address}"></td>`;
+}
+function excludeCard(h) {
+  const on = isExcluded(h);
+  return `<label class="card-exclude"><input class="exclude-toggle" type="checkbox" data-id="${h.id}" ${on ? 'checked' : ''}> Exclude from my list</label>`;
+}
 
 function tableWrap(headers, rowsHtml) {
   if (!rowsHtml) return `<div class="empty">No homes match this filter.</div>`;
-  return `<div class="table-scroll"><table><thead><tr>${headers.map((h) => `<th>${h}</th>`).join('')}</tr></thead><tbody>${rowsHtml}</tbody></table></div>`;
+  return `<div class="table-scroll"><table><thead><tr>${headers.map((h) =>
+    h === 'X' ? `<th class="exclude-cell" title="Exclude">X</th>` : `<th>${h}</th>`
+  ).join('')}</tr></thead><tbody>${rowsHtml}</tbody></table></div>`;
 }
 
 function render() {
@@ -477,17 +619,22 @@ function render() {
   const peakNote = maxPeakCommute !== null
     ? ` · ${peakModeLabel()} ≤ ${maxPeakCommute} min`
     : '';
+  const exNote = hideExcluded && excludedIds.size ? ` · hiding ${excludedIds.size}` : '';
   document.getElementById('stats').innerHTML = [
     `<span class="pill on">${DATA.homes.length} homes</span>`,
     `<span class="pill">${active.length} active</span>`,
     `<span class="pill">${topActive} active · Top schools</span>`,
-    `<span class="pill">Showing ${list.length}${peakNote}</span>`,
+    `<span class="pill">Showing ${list.length}${peakNote}${exNote}</span>`,
   ].join('');
+  document.getElementById('excludeCount').textContent = excludedIds.size
+    ? `${excludedIds.size} excluded on this device`
+    : 'No personal excludes yet';
 
   const prio = sortedPriority(list);
   document.getElementById('panel-priority').innerHTML = tableWrap(
-    ['Address', 'Status', 'Price', 'Schools', 'High school', 'Rush', 'Min/Avg/Max', 'Golf', 'Basement', 'Garage', 'Link'],
-    prio.map((h) => `<tr>
+    ['X', 'Address', 'Status', 'Price', 'Schools', 'High school', 'Rush', 'Min/Avg/Max', 'Golf', 'Basement', 'Garage', 'Link'],
+    prio.map((h) => `<tr class="${isExcluded(h) ? 'excluded' : ''}">
+      ${excludeCell(h)}
       <td>${addrCell(h)}</td>
       <td>${statusBadge(h)}</td>
       <td class="num">${money(h.price)}</td>
@@ -503,8 +650,9 @@ function render() {
   );
 
   document.getElementById('panel-schools').innerHTML = tableWrap(
-    ['Address', 'Band', 'Elementary', 'Middle', 'High', 'Note'],
-    list.map((h) => `<tr>
+    ['X', 'Address', 'Band', 'Elementary', 'Middle', 'High', 'Note'],
+    list.map((h) => `<tr class="${isExcluded(h) ? 'excluded' : ''}">
+      ${excludeCell(h)}
       <td>${addrCell(h)}</td>
       <td>${bandBadge(h)}</td>
       <td>${h.elem}</td>
@@ -515,8 +663,9 @@ function render() {
   );
 
   document.getElementById('panel-commute').innerHTML = tableWrap(
-    ['Address', 'Rush range', 'Min', 'Avg', 'Max', 'Off-peak', 'Route', 'Price'],
-    [...list].sort((a, b) => peakValue(a) - peakValue(b)).map((h) => `<tr>
+    ['X', 'Address', 'Rush range', 'Min', 'Avg', 'Max', 'Off-peak', 'Route', 'Price'],
+    [...list].sort((a, b) => peakValue(a) - peakValue(b)).map((h) => `<tr class="${isExcluded(h) ? 'excluded' : ''}">
+      ${excludeCell(h)}
       <td>${addrCell(h)}</td>
       <td>${h.commuteRush}</td>
       <td class="num">${h.peakCommuteMin}</td>
@@ -529,8 +678,9 @@ function render() {
   );
 
   document.getElementById('panel-golf').innerHTML = tableWrap(
-    ['Address', 'Access', 'Detail', 'Link'],
-    list.map((h) => `<tr>
+    ['X', 'Address', 'Access', 'Detail', 'Link'],
+    list.map((h) => `<tr class="${isExcluded(h) ? 'excluded' : ''}">
+      ${excludeCell(h)}
       <td>${addrCell(h)}</td>
       <td>${h.golfKind}</td>
       <td>${h.golf}</td>
@@ -539,8 +689,9 @@ function render() {
   );
 
   document.getElementById('panel-all').innerHTML = tableWrap(
-    ['Address', 'Status', 'Price', 'Beds/Baths', 'Sq Ft', '$/Sq Ft', 'Lot', 'Year', 'HOA/mo', 'Pool', 'Basement', 'Garage', 'Link'],
-    [...list].sort((a, b) => b.price - a.price).map((h) => `<tr>
+    ['X', 'Address', 'Status', 'Price', 'Beds/Baths', 'Sq Ft', '$/Sq Ft', 'Lot', 'Year', 'HOA/mo', 'Pool', 'Basement', 'Garage', 'Link'],
+    [...list].sort((a, b) => b.price - a.price).map((h) => `<tr class="${isExcluded(h) ? 'excluded' : ''}">
+      ${excludeCell(h)}
       <td>${addrCell(h)}</td>
       <td>${statusBadge(h)}</td>
       <td class="num">${money(h.price)}</td>
@@ -559,7 +710,8 @@ function render() {
 
   document.getElementById('panel-cards').innerHTML = list.length
     ? `<div class="cards">${prio.map((h) => `
-      <article class="card">
+      <article class="card ${isExcluded(h) ? 'excluded' : ''}">
+        ${excludeCard(h)}
         <div class="card-top">
           <div>
             <h3>${h.address}</h3>
