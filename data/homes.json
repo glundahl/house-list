@@ -12,7 +12,8 @@
       "Golf notes are descriptive only (access type) — no quality score.",
       "GreatSchools ratings where cited; confirm school assignment with the district before offer.",
       "Bromley appears once (Redfin + Zillow were the same home).",
-      "Prices and status change daily — verify on the listing link."
+      "Prices and status change daily — verify on the listing link.",
+      "Pleasant Wyatt added from OneHome (MLS #4409483) on 2026-09-26."
     ]
   },
   "homes": [
@@ -50,6 +51,41 @@
       "highlights": "Back on market (buyer financing). Thermador kitchen, outdoor fireplace.",
       "source": "Redfin",
       "url": "https://www.redfin.com/NC/Davidson/16830-Reinsch-Dr-28036/home/52433655"
+    },
+    {
+      "id": "pleasant-wyatt",
+      "address": "11808 Pleasant Wyatt Pl",
+      "city": "Charlotte",
+      "state": "NC",
+      "zip": "28277",
+      "status": "Active",
+      "price": 2174990,
+      "beds": 4,
+      "baths": "3 full + 3 half",
+      "sqft": 5360,
+      "lotAcres": 0.51,
+      "year": 2000,
+      "garage": 3,
+      "hoaMo": 176,
+      "ppsf": 406,
+      "pool": "Heated saltwater PebbleTec + spa / waterfall",
+      "secondLiving": "Pool cabana (349 sqft) — sink, DW, powder; full bath → in-law",
+      "gated": false,
+      "community": "Ballantyne Country Club",
+      "elem": "Ballantyne Elem (verify assignment)",
+      "middle": "CMS feeders (verify)",
+      "high": "Ardrey Kell / Ballantyne Ridge (nearby)",
+      "schoolBand": "Top",
+      "schoolNote": "CMS Ballantyne — Ardrey Kell is a top CMS HS; confirm exact assignment with CMS.",
+      "commuteRush": "30–55 min",
+      "commuteOffPeak": "20–30 min",
+      "commuteRoute": "I-485 / I-77 → Mint St",
+      "golf": "On 13th fairway (Rees Jones) — Ballantyne CC membership optional (golf, swim, tennis, fitness, dining)",
+      "golfKind": "On course",
+      "dom": "47",
+      "highlights": "Simonini / Christopher Phelps. Cul-de-sac. Main-level primary, rebuilt kitchen (Sub-Zero, 48\" range), spa bath, pool cabana. Open house Sep 26 1–3pm. Price cut from $2,199,999.",
+      "source": "OneHome / Coldwell",
+      "url": "https://www.coldwellbankerhomes.com/nc/charlotte/11808-pleasant-wyatt-pl/pid_72990020/"
     },
     {
       "id": "ellison",
